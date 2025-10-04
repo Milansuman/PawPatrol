@@ -4,7 +4,9 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 export default function RootLayout() {
   return (
     <KeyboardProvider>
-      <Stack />
+      <Stack screenOptions={{
+        headerShown: false,
+      }}/>
     </KeyboardProvider>
   );
 }

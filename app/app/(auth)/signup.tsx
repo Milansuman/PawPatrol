@@ -3,17 +3,32 @@ import { useState } from 'react';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import ShelterSelector from '../../components/ShelterSelector';
+
+interface Shelter {
+  id: string;
+  name: string;
+  location: any;
+}
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+  const [userType, setUserType] = useState<'civilian' | 'shelter'>('civilian');
+  const [selectedShelter, setSelectedShelter] = useState<Shelter | null>(null);
+  const [shelterSelectorVisible, setShelterSelectorVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
     if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (userType === 'shelter' && !selectedShelter) {
+      Alert.alert('Error', 'Please select a shelter');
       return;
     }
 
@@ -28,7 +43,7 @@ export default function SignUpScreen() {
     }
 
     setLoading(true);
-    // TODO: Implement actual sign up logic
+    // TODO: Implement actual sign up logic with shelter selection
     setTimeout(() => {
       setLoading(false);
       Alert.alert('Success', 'Account created successfully!');
@@ -70,6 +85,43 @@ export default function SignUpScreen() {
             autoComplete="email"
           />
         </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Account Type</Text>
+          <View style={styles.userTypeContainer}>
+            <TouchableOpacity
+              style={[styles.userTypeButton, userType === 'civilian' && styles.userTypeButtonActive]}
+              onPress={() => setUserType('civilian')}
+            >
+              <Text style={[styles.userTypeButtonText, userType === 'civilian' && styles.userTypeButtonTextActive]}>
+                Civilian
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.userTypeButton, userType === 'shelter' && styles.userTypeButtonActive]}
+              onPress={() => setUserType('shelter')}
+            >
+              <Text style={[styles.userTypeButtonText, userType === 'shelter' && styles.userTypeButtonTextActive]}>
+                Shelter
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {userType === 'shelter' && (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Select Shelter</Text>
+            <TouchableOpacity
+              style={styles.shelterSelector}
+              onPress={() => setShelterSelectorVisible(true)}
+            >
+              <Text style={[styles.shelterSelectorText, !selectedShelter && styles.placeholderText]}>
+                {selectedShelter ? selectedShelter.name : 'Choose a shelter'}
+              </Text>
+              <Text style={styles.chevron}>›</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Password</Text>
@@ -116,6 +168,13 @@ export default function SignUpScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <ShelterSelector
+        visible={shelterSelectorVisible}
+        onClose={() => setShelterSelectorVisible(false)}
+        onSelect={setSelectedShelter}
+        selectedShelter={selectedShelter || undefined}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -187,5 +246,52 @@ const styles = StyleSheet.create({
   linkTextBold: {
     color: '#007AFF',
     fontWeight: '600',
+  },
+  userTypeContainer: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    backgroundColor: '#f9f9f9',
+    padding: 4,
+  },
+  userTypeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  userTypeButtonActive: {
+    backgroundColor: '#007AFF',
+  },
+  userTypeButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+  },
+  userTypeButtonTextActive: {
+    color: '#fff',
+  },
+  shelterSelector: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#f9f9f9',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  shelterSelectorText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  placeholderText: {
+    color: '#999',
+  },
+  chevron: {
+    fontSize: 20,
+    color: '#999',
+    fontWeight: 'bold',
   },
 });
