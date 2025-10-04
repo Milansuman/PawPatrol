@@ -1,8 +1,20 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { getToken } from '../lib/fetch';
 
 export default function WelcomeScreen() {
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await getToken();
+      if (token) {
+        router.replace('/(main)');
+      }
+    };
+    checkAuth();
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />

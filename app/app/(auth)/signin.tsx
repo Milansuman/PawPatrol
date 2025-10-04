@@ -16,12 +16,28 @@ export default function SignInScreen() {
     }
 
     setLoading(true);
-    // TODO: Implement actual sign in logic
-    setTimeout(() => {
+    
+    try {
+      const { apiPost, storeToken } = await import('../../lib/fetch');
+      const response = await apiPost('/auth/login', {
+        name: email,
+        password
+      });
+
+      if (response.error) {
+        Alert.alert('Error', response.error);
+        return;
+      }
+
+      if (response.data?.token) {
+        await storeToken(response.data.token);
+        router.replace('/(main)');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error occurred');
+    } finally {
       setLoading(false);
-      Alert.alert('Success', 'Welcome back!');
-      router.replace('/');
-    }, 1000);
+    }
   };
 
   const handleForgotPassword = () => {

@@ -43,12 +43,30 @@ export default function SignUpScreen() {
     }
 
     setLoading(true);
-    // TODO: Implement actual sign up logic with shelter selection
-    setTimeout(() => {
+    
+    try {
+      const { apiPost, storeToken } = await import('../../lib/fetch');
+      const response = await apiPost('/auth/register', {
+        name,
+        password,
+        type: userType,
+        shelterId: selectedShelter?.id
+      });
+
+      if (response.error) {
+        Alert.alert('Error', response.error);
+        return;
+      }
+
+      if (response.data?.token) {
+        await storeToken(response.data.token);
+        router.replace('/(main)');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Network error occurred');
+    } finally {
       setLoading(false);
-      Alert.alert('Success', 'Account created successfully!');
-      router.replace('/');
-    }, 1000);
+    }
   };
 
   return (
