@@ -22,7 +22,7 @@ export const users = pgTable("users", {
   password: text().notNull(),
   type: userTypes().default("civilian"),
   shelterId: uuid().references(() => shelters.id, {
-    onDelete: "set null"
+    onDelete: "cascade"
   })
 }).enableRLS();
 
@@ -36,11 +36,16 @@ export const dogReports = pgTable("dog_reports", {
   status: dogReportTypes().default("reported"),
   createdOn: timestamp().defaultNow(),
   acknowledgedOn: timestamp(),
-  reportedId: uuid().references(() => users.id, {
+  reporterId: uuid().references(() => users.id, {
     onDelete: "set null"
   })
 }).enableRLS();
 
 export const dogReportMedia = pgTable("dog_reports_media", {
   id: uuid().notNull().primaryKey(),
+  dogReportId: uuid().references(() => dogReports.id, {
+    onDelete: "cascade"
+  }),
+  url: text().notNull(),
+  mime: text().notNull()
 }).enableRLS();
