@@ -11,7 +11,7 @@ type Variables = {
 
 const sheltersRoute = new Hono<{ Variables: Variables }>();
 
-sheltersRoute.get('/', authMiddleware, async (c) => {
+sheltersRoute.get('/', async (c) => {
   try {
     const allShelters = await db.select().from(shelters);
     return c.json(allShelters);

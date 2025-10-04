@@ -48,6 +48,7 @@ export default function SignInScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
+            placeholderTextColor="#999"
           />
         </View>
 
@@ -56,6 +57,7 @@ export default function SignInScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter your password"
+            placeholderTextColor="#999"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -134,6 +136,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#f9f9f9',
+    color: "#222222"
   },
   forgotPasswordButton: {
     alignSelf: 'flex-end',

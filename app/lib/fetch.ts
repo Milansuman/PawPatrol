@@ -54,6 +54,7 @@ export async function authenticatedFetch<T = any>(
 
     return { data };
   } catch (error) {
+    console.error(error);
     return { error: 'Network error' };
   }
 }

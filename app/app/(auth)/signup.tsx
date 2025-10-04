@@ -2,7 +2,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import ShelterSelector from '../../components/ShelterSelector';
 
 interface Shelter {
@@ -52,7 +52,7 @@ export default function SignUpScreen() {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
+    <KeyboardAwareScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       <StatusBar style="auto" />
       
       <View style={styles.header}>
@@ -66,6 +66,7 @@ export default function SignUpScreen() {
           <TextInput
             style={styles.input}
             placeholder="Enter your full name"
+            placeholderTextColor="#999"
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
@@ -77,7 +78,8 @@ export default function SignUpScreen() {
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter your email"
+            placeholder="Enter your email address"
+            placeholderTextColor="#999"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -127,7 +129,8 @@ export default function SignUpScreen() {
           <Text style={styles.label}>Password</Text>
           <TextInput
             style={styles.input}
-            placeholder="Create a password"
+            placeholder="Create a secure password"
+            placeholderTextColor="#999"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -140,7 +143,8 @@ export default function SignUpScreen() {
           <Text style={styles.label}>Confirm Password</Text>
           <TextInput
             style={styles.input}
-            placeholder="Confirm your password"
+            placeholder="Re-enter your password"
+            placeholderTextColor="#999"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
@@ -175,7 +179,7 @@ export default function SignUpScreen() {
         onSelect={setSelectedShelter}
         selectedShelter={selectedShelter || undefined}
       />
-    </KeyboardAvoidingView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -183,7 +187,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollContent: {
     padding: 20,
+    flexGrow: 1,
   },
   header: {
     paddingTop: 40,
@@ -219,6 +226,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#f9f9f9',
+    color: '#333',
   },
   button: {
     backgroundColor: '#007AFF',
