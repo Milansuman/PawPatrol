@@ -43,6 +43,7 @@ auth.post('/register', async (c) => {
       token 
     });
   } catch (error) {
+    console.error(error);
     return c.json({ error: 'Registration failed' }, 500);
   }
 });
@@ -78,6 +79,7 @@ auth.post('/login', async (c) => {
       token 
     });
   } catch (error) {
+    console.error(error);
     return c.json({ error: 'Login failed' }, 500);
   }
 });

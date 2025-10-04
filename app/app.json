@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jkj5.pawpatrol"
+      "bundleIdentifier": "com.jkj5.pawpatrol",
+      "config": {
+        "googleMapsApiKey": "AIzaSyCUJpMWfq849puT_IWUonfR5H7ho-Ko6kk"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +24,12 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.jkj5.pawpatrol"
+      "package": "com.jkj5.pawpatrol",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCUJpMWfq849puT_IWUonfR5H7ho-Ko6kk"
+        }
+      }
     },
     "web": {
       "output": "static",
@@ -47,7 +55,8 @@
         {
           "launchMode": "most-recent"
         }
-      ]
+      ],
+      "expo-location"
     ],
     "experiments": {
       "typedRoutes": true,

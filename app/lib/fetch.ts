@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-const BACKEND_URL = "http://10.148.15.206:8787";
+const BACKEND_URL = "http://172.30.3.176:8787";
 const TOKEN_KEY = 'auth_token';
 
 export interface ApiResponse<T = any> {
