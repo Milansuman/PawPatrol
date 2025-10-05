@@ -85,6 +85,7 @@ export default function BottomSheetSelector<T extends SelectableItem>({
           value={searchQuery}
           onChangeText={onSearchChange}
           autoCapitalize="none"
+          placeholderTextColor="#999"
         />
       </View>
 
@@ -137,6 +138,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#f9f9f9',
+    color: "#333"
   },
   list: {
     flex: 1,

@@ -48,6 +48,27 @@ export default function SettingsScreen() {
     router.back();
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: () => {
+            // Navigate to auth screen
+            router.replace('/(auth)/signin');
+          },
+        },
+      ]
+    );
+  };
+
   const getCurrentLocation = async () => {
     try {
       setLocationStatus('Getting location...');
@@ -195,28 +216,11 @@ export default function SettingsScreen() {
           </View>
         )}
 
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <View style={styles.settingItemContent}>
-            <Ionicons name="person" size={24} color="#007AFF" />
-            <Text style={styles.settingItemText}>Profile Settings</Text>
+            <Ionicons name="log-out" size={24} color="#FF3B30" />
+            <Text style={styles.logoutButtonText}>Logout</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#666" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.settingItem}>
-          <View style={styles.settingItemContent}>
-            <Ionicons name="notifications" size={24} color="#007AFF" />
-            <Text style={styles.settingItemText}>Notifications</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#666" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.settingItem}>
-          <View style={styles.settingItemContent}>
-            <Ionicons name="help-circle" size={24} color="#007AFF" />
-            <Text style={styles.settingItemText}>Help & Support</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#666" />
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -344,5 +348,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#007AFF',
     marginLeft: 4,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    marginHorizontal: 20,
+    marginBottom: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FF3B30',
+  },
+  logoutButtonText: {
+    fontSize: 16,
+    color: '#FF3B30',
+    marginLeft: 15,
+    fontWeight: '600',
   },
 });
