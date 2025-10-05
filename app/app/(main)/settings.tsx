@@ -10,17 +10,66 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { apiPost, apiGet } from '../../lib/fetch';
+import * as Location from 'expo-location';
+import { useEffect } from 'react';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const [showCreateShelter, setShowCreateShelter] = useState(false);
   const [shelterName, setShelterName] = useState('');
-  const [shelterAddress, setShelterAddress] = useState('');
-  const [shelterPhone, setShelterPhone] = useState('');
-  const [shelterEmail, setShelterEmail] = useState('');
+  const [isCreatingShelter, setIsCreatingShelter] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{latitude: number, longitude: number} | null>(null);
+  const [locationStatus, setLocationStatus] = useState('Not detected');
+  const [userShelter, setUserShelter] = useState<any>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
+
+  const fetchUserInfo = async () => {
+    try {
+      const response = await apiGet('/users/me');
+      if (response.data && response.data.shelterId) {
+        const shelterResponse = await apiGet(`/shelters/${response.data.shelterId}`);
+        if (shelterResponse.data) {
+          setUserShelter(shelterResponse.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+    } finally {
+      setIsLoadingUser(false);
+    }
+  };
 
   const handleBack = () => {
     router.back();
+  };
+
+  const getCurrentLocation = async () => {
+    try {
+      setLocationStatus('Getting location...');
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setLocationStatus('Permission denied');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      setCurrentLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude
+      });
+      setLocationStatus(`${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`);
+    } catch (error) {
+      console.error('Error getting location:', error);
+      setLocationStatus('Failed to get location');
+    }
   };
 
   const handleCreateShelter = async () => {
@@ -29,27 +78,43 @@ export default function SettingsScreen() {
       return;
     }
 
+    if (!currentLocation) {
+      Alert.alert('Error', 'Please get your current location first');
+      return;
+    }
+
+    setIsCreatingShelter(true);
+
     try {
-      // TODO: Replace with actual API call
       const shelterData = {
         name: shelterName,
-        address: shelterAddress,
-        phone: shelterPhone,
-        email: shelterEmail,
+        location: {
+          x: currentLocation.longitude,
+          y: currentLocation.latitude
+        }
       };
 
-      console.log('Creating shelter:', shelterData);
-      Alert.alert('Success', 'Shelter created successfully!');
+      const response = await apiPost('/shelters', shelterData);
       
-      // Reset form
+      if (response.error) {
+        Alert.alert('Error', response.error);
+        setIsCreatingShelter(false);
+        return;
+      }
+
+      Alert.alert('Success', 'Shelter created successfully at your current location!');
+      
+      // Reset form and refresh user info
       setShelterName('');
-      setShelterAddress('');
-      setShelterPhone('');
-      setShelterEmail('');
+      setCurrentLocation(null);
+      setLocationStatus('Not detected');
       setShowCreateShelter(false);
+      fetchUserInfo();
     } catch (error) {
       console.error('Error creating shelter:', error);
-      Alert.alert('Error', 'Failed to create shelter');
+      Alert.alert('Error', 'Failed to create shelter. Please try again.');
+    } finally {
+      setIsCreatingShelter(false);
     }
   };
 
@@ -63,22 +128,33 @@ export default function SettingsScreen() {
       </View>
 
       <ScrollView style={styles.content}>
-        <TouchableOpacity
-          style={styles.settingItem}
-          onPress={() => setShowCreateShelter(!showCreateShelter)}
-        >
-          <View style={styles.settingItemContent}>
-            <Ionicons name="home" size={24} color="#007AFF" />
-            <Text style={styles.settingItemText}>Create New Shelter</Text>
-          </View>
-          <Ionicons
-            name={showCreateShelter ? "chevron-up" : "chevron-down"}
-            size={20}
-            color="#666"
-          />
-        </TouchableOpacity>
+        {!isLoadingUser && !userShelter && (
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => setShowCreateShelter(!showCreateShelter)}
+          >
+            <View style={styles.settingItemContent}>
+              <Ionicons name="home" size={24} color="#007AFF" />
+              <Text style={styles.settingItemText}>Create New Shelter</Text>
+            </View>
+            <Ionicons
+              name={showCreateShelter ? "chevron-up" : "chevron-down"}
+              size={20}
+              color="#666"
+            />
+          </TouchableOpacity>
+        )}
 
-        {showCreateShelter && (
+        {!isLoadingUser && userShelter && (
+          <View style={styles.settingItem}>
+            <View style={styles.settingItemContent}>
+              <Ionicons name="home" size={24} color="#007AFF" />
+              <Text style={styles.settingItemText}>My Shelter: {userShelter.name}</Text>
+            </View>
+          </View>
+        )}
+
+        {!isLoadingUser && !userShelter && showCreateShelter && (
           <View style={styles.createShelterForm}>
             <Text style={styles.formTitle}>New Shelter Information</Text>
             
@@ -94,44 +170,27 @@ export default function SettingsScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Address</Text>
-              <TextInput
-                style={styles.textInput}
-                value={shelterAddress}
-                onChangeText={setShelterAddress}
-                placeholder="Enter shelter address"
-                placeholderTextColor="#999"
-                multiline
-              />
+              <Text style={styles.inputLabel}>Location</Text>
+              <View style={styles.locationContainer}>
+                <Text style={styles.locationText}>{locationStatus}</Text>
+                <TouchableOpacity 
+                  style={styles.locationButton} 
+                  onPress={getCurrentLocation}
+                >
+                  <Ionicons name="location" size={16} color="#007AFF" />
+                  <Text style={styles.locationButtonText}>Get Location</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Phone Number</Text>
-              <TextInput
-                style={styles.textInput}
-                value={shelterPhone}
-                onChangeText={setShelterPhone}
-                placeholder="Enter phone number"
-                placeholderTextColor="#999"
-                keyboardType="phone-pad"
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <TextInput
-                style={styles.textInput}
-                value={shelterEmail}
-                onChangeText={setShelterEmail}
-                placeholder="Enter email address"
-                placeholderTextColor="#999"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <TouchableOpacity style={styles.submitButton} onPress={handleCreateShelter}>
-              <Text style={styles.submitButtonText}>Create Shelter</Text>
+            <TouchableOpacity 
+              style={[styles.submitButton, isCreatingShelter && styles.submitButtonDisabled]} 
+              onPress={handleCreateShelter}
+              disabled={isCreatingShelter}
+            >
+              <Text style={styles.submitButtonText}>
+                {isCreatingShelter ? 'Creating Shelter...' : 'Create Shelter'}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -253,5 +312,37 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+  },
+  locationText: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  locationButtonText: {
+    fontSize: 14,
+    color: '#007AFF',
+    marginLeft: 4,
   },
 });

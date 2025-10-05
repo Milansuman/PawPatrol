@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { eq } from 'drizzle-orm';
 import { db } from '../../lib/db/index.js';
-import { shelters } from '../../lib/db/schema.js';
-import { authMiddleware, shelterOnlyMiddleware, UserPayload } from '../../lib/auth.js';
+import { shelters, users } from '../../lib/db/schema.js';
+import { authMiddleware, shelterOnlyMiddleware } from '../../lib/auth.js';
+import type {UserPayload} from "../../lib/auth.js";
 import { v4 as uuidv4 } from 'uuid';
 
 type Variables = {
@@ -35,9 +36,10 @@ sheltersRoute.get('/:id', authMiddleware, async (c) => {
   }
 });
 
-sheltersRoute.post('/', authMiddleware, shelterOnlyMiddleware, async (c) => {
+sheltersRoute.post('/', authMiddleware, async (c) => {
   try {
     const { name, location } = await c.req.json();
+    const user = c.get('user') as UserPayload;
     
     if (!name || !location) {
       return c.json({ error: 'Name and location are required' }, 400);
@@ -49,6 +51,14 @@ sheltersRoute.post('/', authMiddleware, shelterOnlyMiddleware, async (c) => {
       name,
       location
     }).returning();
+
+    // Update the user to be associated with this shelter and change type to 'shelter'
+    await db.update(users)
+      .set({ 
+        shelterId: shelterId,
+        type: 'shelter'
+      })
+      .where(eq(users.id, user.id));
 
     return c.json(shelter, 201);
   } catch (error) {

@@ -2,7 +2,8 @@ import { Hono } from 'hono';
 import { eq } from 'drizzle-orm';
 import { db } from '../../lib/db/index.js';
 import { users } from '../../lib/db/schema.js';
-import { authMiddleware, UserPayload } from '../../lib/auth.js';
+import { authMiddleware } from '../../lib/auth.js';
+import type { UserPayload } from '../../lib/auth.js';
 
 type Variables = {
   user: UserPayload;
@@ -26,6 +27,7 @@ usersRoute.get('/me', authMiddleware, async (c) => {
     
     return c.json(userData);
   } catch (error) {
+    console.error(error);
     return c.json({ error: 'Failed to fetch user' }, 500);
   }
 });

@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { Context, Next } from 'hono';
-import { hashPassword as cryptoHashPassword, verifyPassword as cryptoVerifyPassword } from './crypto';
+import type { Context, Next } from 'hono';
+import { hashPassword as cryptoHashPassword, verifyPassword as cryptoVerifyPassword } from './crypto.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 

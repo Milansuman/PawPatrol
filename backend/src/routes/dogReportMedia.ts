@@ -2,7 +2,8 @@ import { Hono } from 'hono';
 import { eq } from 'drizzle-orm';
 import { db } from '../../lib/db/index.js';
 import { dogReportMedia, dogReports } from '../../lib/db/schema.js';
-import { authMiddleware, UserPayload } from '../../lib/auth.js';
+import { authMiddleware } from '../../lib/auth.js';
+import type { UserPayload } from '../../lib/auth.js';
 import { v4 as uuidv4 } from 'uuid';
 
 type Variables = {

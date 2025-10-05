@@ -2,8 +2,9 @@ import { Hono } from 'hono';
 import { eq, and } from 'drizzle-orm';
 import { db } from '../../lib/db/index.js';
 import { dogReports } from '../../lib/db/schema.js';
-import { authMiddleware, UserPayload, shelterOnlyMiddleware } from '../../lib/auth.js';
+import { authMiddleware, shelterOnlyMiddleware } from '../../lib/auth.js';
 import { v4 as uuidv4 } from 'uuid';
+import type { UserPayload } from '../../lib/auth.js';
 
 type Variables = {
   user: UserPayload;
@@ -14,6 +15,7 @@ const dogReportsRoute = new Hono<{ Variables: Variables }>();
 dogReportsRoute.get('/', authMiddleware, async (c) => {
   try {
     const allReports = await db.select().from(dogReports);
+    console.log(allReports);
     return c.json(allReports);
   } catch (error) {
     return c.json({ error: 'Failed to fetch dog reports' }, 500);

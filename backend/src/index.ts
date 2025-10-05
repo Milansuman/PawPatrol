@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { serve } from '@hono/node-server';
 import auth from './routes/auth.js';
 import usersRoute from './routes/users.js';
 import sheltersRoute from './routes/shelters.js';
@@ -22,4 +23,11 @@ app.route('/shelters', sheltersRoute);
 app.route('/dog-reports', dogReportsRoute);
 app.route('/dog-report-media', dogReportMediaRoute);
 
-export default app;
+const port = parseInt(process.env.PORT || '8787');
+
+console.log(`Server is running on port ${port}`);
+
+serve({
+  fetch: app.fetch,
+  port
+});
